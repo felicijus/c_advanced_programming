@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(openmp_test C)
+project(c_advanced_programming C)
 
 # added -fopenmp
 find_package(OpenMP)
