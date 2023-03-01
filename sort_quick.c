@@ -1,3 +1,4 @@
+
 /*
 Author: Felix Schneider
 Date: February 28th, 2023
@@ -6,40 +7,40 @@ Purpose: General function
 
 /*HEADER FILES INCLUDED*/
 
-#define _CRT_SECURE_NO_WARNINGS
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cert-msc50-cpp"
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <omp.h>
 
-/*FUNCTION PROTOYPES DECLARED*/
+/*FUNCTION PROTOTYPES DECLARED*/
 
 /*none*/
 
 /*CONSTANTS DEFINED*/
 
-#define ARRAY_SIZE 800000
-#define RANDOM 50
+#define ARRAY_SIZE 10000000
+#define RANDOM 10000
 
 int number[ARRAY_SIZE];
 
 /*FUNCTION*/
 
-void random_number(int *number) {
+void random_number(int *array) {
     int i;
 
     for (i = 0; i < ARRAY_SIZE - 1; i++) {
-        number[i] = rand() % (RANDOM);
+        array[i] = rand() % RANDOM + 1;
     }
 }
 
-void random_number_omp(int *number) {
+void random_number_omp(int *array) {
     int i;
 
     #pragma omp for nowait
     for (i = 0; i < ARRAY_SIZE - 1; i++) {
-        number[i] = rand() % (500);
+        array[i] = rand() % RANDOM + 1;
     }
 }
 
@@ -49,50 +50,39 @@ void swap(int *a, int *b) {
     *b = temp;
 }
 
-int partition(int number[], int low, int high) {
-    int pivot = number[high];
+int partition(int array[], int low, int high) {
+    int pivot = array[high];
     int i = (low - 1);
     for (int j = low; j < high; j++) {
-        if (number[j] <= pivot) {
+        if (array[j] <= pivot) {
             i++;
-            swap(&number[i], &number[j]);
+            swap(&array[i], &array[j]);
         }
     }
-    swap(&number[i + 1], &number[high]);
+    swap(&array[i + 1], &array[high]);
     return (i + 1);
 }
 
-int partition_omp(int number[], int low, int high) {
-    int pivot = number[high];
-    int i = (low - 1);
-
-    //#pragma omp for
-    for (int j = low; j < high; j++) {
-        if (number[j] <= pivot) {
-            i++;
-            swap(&number[i], &number[j]);
-        }
-    }
-    swap(&number[i + 1], &number[high]);
-    return (i + 1);
-}
-
-void quick_sort(int number[], int low, int high) {
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "misc-no-recursion"
+void quick_sort(int array[], int low, int high) {
     if (low < high) {
-        int partition_index = partition(number, low, high);
+        int partition_index = partition(array, low, high);
 
-        quick_sort(number, low, partition_index - 1);
-        quick_sort(number, partition_index + 1, high);
+        quick_sort(array, low, partition_index - 1);
+        quick_sort(array, partition_index + 1, high);
     }
 }
+#pragma clang diagnostic pop
 
-void quick_sort_omp(int number[], int low, int high) {
+void quick_sort_omp(int array[], int low, int high) {
     if (low < high) {
-        int partition_index = partition_omp(number, low, high);
+        int partition_index = partition(array, low, high);
 
-        #pragma omp task firstprivate(number,low,partition_index) default(none)
-        quick_sort_omp(number, low, partition_index - 1);
-        quick_sort_omp(number, partition_index + 1, high);
+        #pragma omp task shared(array, low, partition_index) default(none)
+        quick_sort_omp(array, low, partition_index - 1);
+        #pragma omp task shared(array, high, partition_index) default(none)
+        quick_sort_omp(array, partition_index + 1, high);
     }
 }
 
@@ -125,17 +115,19 @@ int main(void) {
     finish = omp_get_wtime();
     printf("Time: %f", (finish - start));
 
-    printf("\nSorting numbers with OpenMP\n");
+    printf("\nSorting numbers with OpenMP and %i processing cores\n", omp_get_num_procs());
     start = omp_get_wtime();
-    quick_sort_omp(number, 0, ARRAY_SIZE - 1);
+
+    #pragma omp parallel shared(number) default(none)
+    {
+        #pragma omp single
+        quick_sort_omp(number, 0, ARRAY_SIZE - 1);
+        #pragma omp taskwait
+    }
+
     finish = omp_get_wtime();
     printf("Time: %f", (finish - start));
 
-    printf("\n");
-
-    system("PAUSE");
-    system("cls");
-    main();
-
     return 0;
 }
+#pragma clang diagnostic pop

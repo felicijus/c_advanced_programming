@@ -11,4 +11,4 @@ endif()
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(openmp_test sort_quick.c)
+add_executable(sort_quick sort_quick.c)
