@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(c_advanced_programming C)
+project(c_advanced_programming  C CXX)
 
 # added -fopenmp
 find_package(OpenMP)
@@ -12,3 +12,4 @@ endif()
 set(CMAKE_C_STANDARD 11)
 
 add_executable(sort_quick sort_quick.c)
+#add_executable(double_precision double_precision.cpp)

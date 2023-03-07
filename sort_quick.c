@@ -23,23 +23,18 @@ Purpose: General function
 #define ARRAY_SIZE 10000000
 #define RANDOM 10000
 
-int number[ARRAY_SIZE];
 
 /*FUNCTION*/
 
 void random_number(int *array) {
-    int i;
-
-    for (i = 0; i < ARRAY_SIZE - 1; i++) {
+    for (int i = 0; i <= ARRAY_SIZE - 1; i++) {
         array[i] = rand() % RANDOM + 1;
     }
 }
 
 void random_number_omp(int *array) {
-    int i;
-
     #pragma omp for nowait
-    for (i = 0; i < ARRAY_SIZE - 1; i++) {
+    for (int i = 0; i <= ARRAY_SIZE - 1; i++) {
         array[i] = rand() % RANDOM + 1;
     }
 }
@@ -50,11 +45,11 @@ void swap(int *a, int *b) {
     *b = temp;
 }
 
-int partition(int array[], int low, int high) {
+int partition(int *array, int low, int high) {
     int pivot = array[high];
     int i = (low - 1);
-    for (int j = low; j < high; j++) {
-        if (array[j] <= pivot) {
+    for (int j = low; j <= high - 1 ; j++) {
+        if (array[j] < pivot) {
             i++;
             swap(&array[i], &array[j]);
         }
@@ -65,7 +60,7 @@ int partition(int array[], int low, int high) {
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "misc-no-recursion"
-void quick_sort(int array[], int low, int high) {
+void quick_sort(int *array, int low, int high) {
     if (low < high) {
         int partition_index = partition(array, low, high);
 
@@ -73,20 +68,25 @@ void quick_sort(int array[], int low, int high) {
         quick_sort(array, partition_index + 1, high);
     }
 }
-#pragma clang diagnostic pop
 
+#pragma clang diagnostic pop
 void quick_sort_omp(int array[], int low, int high) {
     if (low < high) {
         int partition_index = partition(array, low, high);
 
         #pragma omp task shared(array, low, partition_index) default(none)
         quick_sort_omp(array, low, partition_index - 1);
+
         #pragma omp task shared(array, high, partition_index) default(none)
         quick_sort_omp(array, partition_index + 1, high);
     }
 }
 
 int main(void) {
+
+    // int number[ARRAY_SIZE];
+
+    int *number = calloc(ARRAY_SIZE, sizeof(int));
 
     // Time
     double start, finish;
