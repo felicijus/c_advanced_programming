@@ -7,9 +7,6 @@ Purpose: General function
 
 /*HEADER FILES INCLUDED*/
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "cert-msc50-cpp"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>
@@ -20,9 +17,8 @@ Purpose: General function
 
 /*CONSTANTS DEFINED*/
 
-#define ARRAY_SIZE 10000000
-#define RANDOM 10000
-
+#define ARRAY_SIZE 80000
+#define RANDOM 10
 
 /*FUNCTION*/
 
@@ -33,7 +29,7 @@ void random_number(int *array) {
 }
 
 void random_number_omp(int *array) {
-    #pragma omp for nowait
+#pragma omp for nowait
     for (int i = 0; i <= ARRAY_SIZE - 1; i++) {
         array[i] = rand() % RANDOM + 1;
     }
@@ -58,8 +54,6 @@ int partition(int *array, int low, int high) {
     return (i + 1);
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "misc-no-recursion"
 void quick_sort(int *array, int low, int high) {
     if (low < high) {
         int partition_index = partition(array, low, high);
@@ -69,15 +63,14 @@ void quick_sort(int *array, int low, int high) {
     }
 }
 
-#pragma clang diagnostic pop
 void quick_sort_omp(int array[], int low, int high) {
     if (low < high) {
         int partition_index = partition(array, low, high);
 
-        #pragma omp task shared(array, low, partition_index) default(none)
+#pragma omp task shared(array, low, partition_index) default(none)
         quick_sort_omp(array, low, partition_index - 1);
 
-        #pragma omp task shared(array, high, partition_index) default(none)
+#pragma omp task shared(array, high, partition_index) default(none)
         quick_sort_omp(array, partition_index + 1, high);
     }
 }
@@ -85,7 +78,6 @@ void quick_sort_omp(int array[], int low, int high) {
 int main(void) {
 
     // int number[ARRAY_SIZE];
-
     int *number = calloc(ARRAY_SIZE, sizeof(int));
 
     // Time
@@ -118,11 +110,11 @@ int main(void) {
     printf("\nSorting numbers with OpenMP and %i processing cores\n", omp_get_num_procs());
     start = omp_get_wtime();
 
-    #pragma omp parallel shared(number) default(none)
+#pragma omp parallel shared(number) default(none)
     {
-        #pragma omp single
+#pragma omp single
         quick_sort_omp(number, 0, ARRAY_SIZE - 1);
-        #pragma omp taskwait
+#pragma omp taskwait
     }
 
     finish = omp_get_wtime();
@@ -130,4 +122,3 @@ int main(void) {
 
     return 0;
 }
-#pragma clang diagnostic pop
