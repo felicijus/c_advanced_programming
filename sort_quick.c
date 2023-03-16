@@ -17,8 +17,8 @@ Purpose: General function
 
 /*CONSTANTS DEFINED*/
 
-#define ARRAY_SIZE 80000
-#define RANDOM 10
+#define ARRAY_SIZE 10000000
+#define RANDOM 1000
 
 /*FUNCTION*/
 
@@ -96,6 +96,8 @@ int main(void) {
     start = omp_get_wtime();
     quick_sort(number, 0, ARRAY_SIZE - 1);
     finish = omp_get_wtime();
+
+    double time_single = finish - start;
     printf("Time: %f", (finish - start));
 
     printf("\n");
@@ -118,7 +120,11 @@ int main(void) {
     }
 
     finish = omp_get_wtime();
-    printf("Time: %f", (finish - start));
+    double time_omp = finish - start;
+    printf("Time: %f\n", (finish - start));
+
+    printf("\nSpeedup-Factor: %f\n", (time_single / time_omp));
+
 
     return 0;
 }
