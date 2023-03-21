@@ -1,4 +1,3 @@
-
 /*
 Author: Felix Schneider
 Date: February 28th, 2023
@@ -17,8 +16,8 @@ Purpose: General function
 
 /*CONSTANTS DEFINED*/
 
-#define ARRAY_SIZE 10000000
-#define RANDOM 1000
+#define ARRAY_SIZE 80000
+#define RANDOM 10
 
 /*FUNCTION*/
 
@@ -96,11 +95,10 @@ int main(void) {
     start = omp_get_wtime();
     quick_sort(number, 0, ARRAY_SIZE - 1);
     finish = omp_get_wtime();
+    printf("Time: %f\n", (finish - start));
 
-    double time_single = finish - start;
-    printf("Time: %f", (finish - start));
+    double time_single = (finish - start);
 
-    printf("\n");
 
     //OpenMP
     printf("\nRandom numbers with OpenMP\n");
@@ -120,11 +118,11 @@ int main(void) {
     }
 
     finish = omp_get_wtime();
-    double time_omp = finish - start;
     printf("Time: %f\n", (finish - start));
 
-    printf("\nSpeedup-Factor: %f\n", (time_single / time_omp));
+    double time_omp = (finish - start);
 
+    printf("\nSpeedup Factor: %f\n", (time_single / time_omp));
 
     return 0;
 }
